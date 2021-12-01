@@ -18,8 +18,15 @@ class Day01 extends AbstractSolver
     public function partOne(): int
     {
         $result = 0;
-        for ($i = 0, $m = count($this->input) - 1; $i < $m; $i++) {
-            $result += $this->input[$i] < $this->input[$i + 1] ? 1 : 0;
+        $previous = $this->input[0];
+
+        foreach($this->input as $v) {
+            if (intval($v)) {
+                if ($v > $previous) {
+                    $result++;
+                }
+                $previous = $v;
+            }
         }
 
         return $result;
@@ -29,11 +36,30 @@ class Day01 extends AbstractSolver
     public function partTwo(): int
     {
         $result = 0;
-        for ($i = 0, $m = count($this->input) - 3; $i < $m; $i++) {
-            $one = array_sum(array_slice($this->input, $i, 3));
-            $two = array_sum(array_slice($this->input, $i + 1, 3));
-            if ($one < $two) {
-                $result++;
+        $newArray = [];
+
+        foreach($this->input as $v) {
+            if (intval($v)) {
+                $newArray[] = $v;
+                end($newArray);
+                $k = key($newArray);
+
+                if (!empty($newArray[$k-1])) { $newArray[$k-1] += $v; }
+                if (!empty($newArray[$k-2])) { $newArray[$k-2] += $v; }
+            }
+        }
+
+        /** remove last 2 elements from array */
+        array_slice($newArray, 0, -2);
+
+        $previous = $newArray[0];
+
+        foreach($newArray as $v) {
+            if (intval($v)) {
+                if ($v > $previous) {
+                    $result++;
+                }
+                $previous = $v;
             }
         }
 
