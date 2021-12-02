@@ -17,16 +17,50 @@ class Day02 extends AbstractSolver
     #[Pure]
     public function partOne(): int
     {
-        $result = 0;
+        $horizontal = 0;
+        $vertical = 0;
 
-        return $result;
+        foreach ($this->input as $command) {
+            list ($k, $v) = explode(' ', $command);
+
+            switch($k) {
+                case 'up':
+                    $vertical = $vertical - (int) $v;
+                    break;
+                case 'down':
+                    $vertical += (int) $v;
+                    break;
+                case 'forward':
+                    $horizontal += (int) $v;
+            }
+        }
+
+        return $horizontal * $vertical;
     }
 
     #[Pure]
     public function partTwo(): int
     {
-        $result = 0;
+        $horizontal = 0;
+        $vertical = 0;
+        $aim = 0;
 
-        return $result;
+        foreach ($this->input as $command) {
+            list ($k, $v) = explode(' ', $command);
+
+            switch($k) {
+                case 'up':
+                    $aim = $aim - (int) $v;
+                    break;
+                case 'down':
+                    $aim += (int) $v;
+                    break;
+                case 'forward':
+                    $horizontal += (int) $v;
+                    $vertical += ($aim * (int) $v);
+            }
+        }
+
+        return $horizontal * $vertical;
     }
 }
