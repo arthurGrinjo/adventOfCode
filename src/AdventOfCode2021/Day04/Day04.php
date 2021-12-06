@@ -14,33 +14,40 @@ use MueR\AdventOfCode\AbstractSolver;
  */
 class Day04 extends AbstractSolver
 {
-    private $drawnNumbers = [];
+    private $drawnNumbers = null;
     private $board = [];
-    private $solution = 0;
+    private $drawnNumber = 0;
+    private $bingo = 0;
 
     #[Pure]
     public function partOne(): int
     {
-        $result = 0;
-
         $this->readInput();
-        $this->processDrawnNumbers();
-//        $result = $this->calculateSolution();
-        return (int) $this->solution;
+        $this->processDrawnNumbers(1);
+
+        return $this->calculateResult();
+//        return 0;
     }
 
     #[Pure]
     public function partTwo(): int
     {
-        $result = 0;
+        $this->drawnNumber = 0;
+        $this->bingo = 0;
 
-        return $result;
+        $this->readInput();
+        $this->processDrawnNumbers(2);
+
+        return $this->calculateResult();
     }
 
     public function readInput()
     {
-        /** @var array drawnNumbers */
-        $this->drawnNumbers = explode(',', $this->input[0]);
+        $this->board = [];
+
+        if (empty($this->drawnNumbers)) {
+            $this->drawnNumbers = explode(',', $this->input[0]);
+        }
 
         /** remove first line from array */
         array_shift($this->input);
@@ -70,45 +77,62 @@ class Day04 extends AbstractSolver
         array_pop($this->board);
     }
 
-    public function processDrawnNumbers()
+    public function processDrawnNumbers($mode = 1)
     {
+        var_dump(count($this->drawnNumbers), count($this->board));
         foreach ($this->drawnNumbers as $n)
         {
-            if ($this->solution != 0) {
+            if ($n == "") { continue; }
+
+            if ($this->drawnNumber != 0) {
                 return;
             }
 
             foreach ($this->board as $index => $board)
             {
-                if ($this->solution != 0) {
+                if ($this->drawnNumber != 0) {
                     return;
                 }
 
                 for ($i = 0; $i<5; $i++) {
-                    array_map(function($v, $k) use ($n, $index, $i) {
-                        if ($v == $n) {
-                            unset($this->board[$index]['horizontal'][$i][$k]);
-                            if (empty($this->board[$index]['vertical'][$i])) {
-                                $this->solution = $n;
-                            }
-                        }
-                    }, $board['horizontal'][$i], array_keys($board['horizontal'][$i]));
+                    $this->board[$index]['horizontal'][$i] = array_filter($this->board[$index]['horizontal'][$i],
+                            function($v) use ($n) { return $v != $n; }
+                    );
 
-                    array_map(function ($v, $k) use ($n, $index, $i) {
-                        if ($v == $n) {
-                            unset($this->board[$index]['vertical'][$i][$k]);
-                            if (empty($this->board[$index]['vertical'][$i])) {
-                                $this->solution = $n;
-                            }
+                    $this->board[$index]['vertical'][$i] = array_filter($this->board[$index]['vertical'][$i],
+                        function($v) use ($n) { return $v != $n; }
+                    );
+
+                    if (empty($this->board[$index]['horizontal'][$i]) || empty($this->board[$index]['vertical'][$i])) {
+                        if ($mode == 1) {
+                            $this->drawnNumber = (int) $n;
+                            $this->bingo = $index;
                         }
-                    }, $board['vertical'][$i], array_keys($board['vertical'][$i]));
+
+                        if (count($this->board) == 1) {
+                            $this->drawnNumber = (int) $n;
+                            $this->bingo = $index;
+                            $i = 6;
+                        }
+
+                        if ($mode == 2 && count($this->board) > 1) {
+                            unset($this->board[$index]);
+                            $i = 6;
+                        }
+                    }
                 }
             }
         }
     }
 
-//    public function calculateResult()
-//    {
-//
-//    }
+    public function calculateResult(): int
+    {
+        $total = 0;
+
+        foreach ($this->board[$this->bingo]['horizontal'] as $row) {
+            $total += array_sum($row);
+        }
+
+        return $this->drawnNumber * $total;
+    }
 }
