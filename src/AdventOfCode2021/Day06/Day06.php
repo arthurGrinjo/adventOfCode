@@ -15,7 +15,7 @@ use MueR\AdventOfCode\AbstractSolver;
 class Day06 extends AbstractSolver
 {
     private $lanternFish = [];
-    private $solutions = [0 => 0, 1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 1];
+    private $solutions = [];
 
     #[Pure]
     public function partOne(): int
@@ -40,7 +40,7 @@ class Day06 extends AbstractSolver
         $finalResult = 0;
 
         $iterations += 6;
-        for ($i = 7; $i < $iterations; $i++) {
+        for ($i = 0; $i < $iterations; $i++) {
             $this->solve($i);
         }
 
