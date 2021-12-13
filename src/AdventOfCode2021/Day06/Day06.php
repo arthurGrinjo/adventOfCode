@@ -15,40 +15,61 @@ use MueR\AdventOfCode\AbstractSolver;
 class Day06 extends AbstractSolver
 {
     private $lanternFish = [];
+    private $solutions = [0 => 0, 1 => 1, 2 => 1, 3 => 1, 4 => 1, 5 => 1, 6 => 1];
 
     #[Pure]
     public function partOne(): int
     {
-
         $this->lanternFish = explode(',', $this->input[0]);
-        $i = 0;
+        $result = $this->growLanternFish(80);
 
-        while ($i < 80) {
-            $this->growLanternFish();
-            $i++;
-        }
-
-        return count($this->lanternFish);
+        return $result;
     }
 
     #[Pure]
     public function partTwo(): int
     {
-        $result = 0;
+        $this->lanternFish = explode(',', $this->input[0]);
+        $result = $this->growLanternFish(256);
 
         return $result;
     }
 
-    public function growLanternFish()
+    public function growLanternFish(int $iterations): int
     {
-        foreach($this->lanternFish as $i => $fish)
-        {
-            if ($fish == 0) {
-                $this->lanternFish[] = 8;
-                $this->lanternFish[$i] = 6;
-            } else {
-                $this->lanternFish[$i]--;
-            }
+        $finalResult = 0;
+
+        $iterations += 6;
+        for ($i = 7; $i < $iterations; $i++) {
+            $this->solve($i);
         }
+
+        foreach ($this->lanternFish as $timer) {
+            $finalResult += $this->solutions[($iterations - $timer)];
+        }
+
+        return $finalResult;
+    }
+
+    public function solve(int $iterations)
+    {
+        if (isset($this->solutions[$iterations])) {
+            return;
+        }
+
+        $n = $iterations - 7;
+        $result = 1;
+
+        while ($n >= 0) {
+            if ($n - 2 > 0) {
+                $result += $this->solutions[$n - 2];
+            } else {
+                $result += 1;
+            }
+            $n -= 7;
+        }
+
+        /** save to solutions */
+        $this->solutions[$iterations] = $result;
     }
 }
