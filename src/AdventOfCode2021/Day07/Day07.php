@@ -15,9 +15,7 @@ use MueR\AdventOfCode\AbstractSolver;
 class Day07 extends AbstractSolver
 {
     private $crabPositions = [];
-    private $mode;
     private $median;
-    private $average;
 
     #[Pure]
     public function partOne(): int
@@ -25,33 +23,100 @@ class Day07 extends AbstractSolver
         $this->crabPositions = explode(',', $this->input[0]);
         sort($this->crabPositions);
 
-        $this->median = $this->crabPositions[round(count($this->crabPositions) / 2)];
+        $this->median = $this->findMedian();
 
-        $freq = array();
-        for($i=0; $i<count($this->crabPositions); $i++)
-        {
-            if(isset($freq[$this->crabPositions[$i]])==false)
-            {
-                $freq[$this->crabPositions[$i]] = 1;
-            }
-            else
-            {
-                $freq[$this->crabPositions[$i]]++;
-            }
-        }
-        $maxs = array_keys($freq, max($freq));
+        [$line, $fuel] = $this->findLine(1);
 
-        for($i=0; $i<count($maxs); $i++)
-        {
-            var_dump('Modus: ' . $maxs[$i] . ' - aantal: ' . $freq[$maxs[$i]]);
-        }
-
-        return 0;
+        return $fuel;
     }
 
     #[Pure]
     public function partTwo(): int
     {
-        return 0;
+        [$line, $fuel] = $this->findLine(2);
+        return $fuel;
+    }
+
+    public function findLine(int $mode): array
+    {
+        $solution = 0;
+
+        $i = 0;
+        $line = $this->median;
+        $steps = $this->calculateSteps();
+        $direction = 1;
+
+        while (!empty($steps[$i]) && $solution < 2) {
+            if ($mode === 1) {
+                $firstLine = $this->calculateLine($line);
+                $secondLine = $this->calculateLine(($direction === 1) ? ($line + $steps[$i]) : ($line - $steps[$i]));
+            }
+
+            if ($mode === 2) {
+                $firstLine = $this->calculateLine2($line);
+                $secondLine = $this->calculateLine2(($direction === 1) ? ($line + $steps[$i]) : ($line - $steps[$i]));
+            }
+
+//            var_dump('-----------');
+//            var_dump($line);
+//            var_dump($firstLine);
+//            var_dump($secondLine);
+
+            if ($secondLine > $firstLine) {
+                $direction = ($direction === 1) ? 0 : 1;
+                $solution++;
+
+                if ($solution === 2) {
+                    $solution = 0;
+                    $i++;
+                }
+                continue;
+            }
+
+            if ($secondLine < $firstLine) {
+                $solution = 0;
+                $line = ($direction === 1) ?  ($line + $steps[$i]) : ($line - $steps[$i]);
+            }
+        }
+        return [$line, $firstLine];
+    }
+
+    public function calculateLine($line): int
+    {
+        $newArray = array_map(function ($v) use ($line) {
+            return abs($v - $line);
+        }, $this->crabPositions);
+
+        return array_sum($newArray);
+    }
+
+    public function calculateLine2($line): int
+    {
+        $newArray = array_map(function ($v) use ($line) {
+            return array_sum(range(1, abs($v - $line)));
+        }, $this->crabPositions);
+
+        return array_sum($newArray);
+    }
+
+    public function calculateSteps(): array
+    {
+        $step = end($this->crabPositions);
+        $steps = [];
+        $divisor = 10;
+
+        while (round($step / $divisor) > 1) {
+            $steps[] = (int) round($step / $divisor);
+            $step = (int) round($step / $divisor);
+        }
+
+        $steps[] = 1;
+
+        return $steps;
+    }
+
+    public function findMedian(): int
+    {
+        return (int) $this->crabPositions[round(count($this->crabPositions) / 2)];
     }
 }
